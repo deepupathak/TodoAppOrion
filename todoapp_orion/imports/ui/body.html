@@ -1,0 +1,218 @@
+<!-- Main Container -->
+
+<template name="App_body">
+	{{> Template.dynamic template=main}}
+</template>
+
+<!-- With the help of this template, we can listout the daily tasks.
+It also shows the list of daily tasks. We can go to blog page from here.
+-->
+
+<template name="home">
+	{{# if Template.subscriptionsReady }}
+		<div class="container">
+			<header>
+				<!-- Site Logo from Here -->
+				{{#with logo}}
+					<a href="/"><img id="logo" class="img-responsive" src="{{ image.url }}"></a>
+				{{else}}
+					<a href="/"><img id="logo" class="img-responsive" src="/images/defaultLogo.png"></a>
+				{{/with}}
+				<br>
+				<h1>{{ dict 'site.name' }} ({{incompleteCount}})</h1>
+				<p>Tagline:-&nbsp;<i class="text-muted">"{{ dict 'public.Tagline' }}"</i>.</p>
+				<label class="hide-completed">
+					<input type="checkbox" />
+					Hide Completed Tasks
+				</label>
+
+				<!--  Show Login/SignUp Button -->
+
+				<!-- {{> loginButtons}} -->
+				{{#if currentUser}}
+					<i class="text-muted">User Logged in</i>.
+				{{else}}
+					<i class="text-muted">User not logged in. Please login from backend to continue.</i>.
+				{{/if}}
+				<!-- This form only appear when user is logged in -->
+
+				{{#if currentUser}}
+					<form class="new-task">
+						<input type="text" name="text" placeholder="Type to add new tasks" />
+					</form>
+				{{/if}}
+			</header>
+
+			<ul>
+				<!-- call template named task for showing data fetched from helper function -->
+				{{#each tasks}}
+					{{> task}}
+				{{/each}}
+			</ul>
+
+			<!-- This footer only appear when user is logged in -->
+
+			{{#if currentUser}}
+				<footer>
+					<a href="/post">Show Blogs</a>
+				</footer>
+			{{/if}}
+		</div>
+	{{ else }}
+		<p>
+			Loading...
+		</p>
+	{{/if}}
+</template>
+
+<!-- Container of homePost template -->
+
+<template name="allPost">
+	<div class="container">
+		<header>
+			<h1>Blogs</h1>
+		</header>
+		{{# if Template.subscriptionsReady }}
+			{{# each postRecord }}
+				<ul>
+					{{> homePost }}
+				</ul>
+			{{ else }}
+				<p>
+					No posts found
+				</p>
+			{{/ each }}
+		{{ else }}
+			<p>
+				Loading...
+			</p>
+		{{/ if }}
+		<footer>
+			<a href="/">Back</a>
+		</footer>
+	</div>
+</template>
+
+<!-- In this template, only title, image and author name of the post is shown.
+When we Click on title or image of post, then detailed information of post is shown. 
+-->
+
+<template name="homePost">
+	<li>
+		<div class="home-post">
+			<h3>
+				<a href='/post/{{_id}}'>
+					{{ title }}
+				</a>
+			</h3>
+			{{# if image }}
+				<a href='/post/{{_id}}'>
+					<div class="image" style="background-image: url({{ image.url }})"></div>
+				</a>
+			{{/ if }}
+			<p>
+				by <b>{{ getCreator.profile.name }}</b>
+			</p>
+			<!-- <span>
+				{{# if currentUser }}
+				<a href="" class="like-btn" style="{{# if likes currentUser._id }}color: #337ab7;{{ else }}color: #999;{{/ if }} margin-right: 7px; text-decoration: none">
+					<span style="margin-right: 3px;">{{ likesCount }}</span> <small><i class="fa fa-thumbs-up"></i></small>
+				</a>
+				{{ else }}
+					<a href="admin/login?ref=%2F">Login to like posts</a>
+					<span class="color: #999;">
+						<span style="margin-right: 3px;">{{ likesCount }}</span> <small><i class="fa fa-thumbs-up"></i></small>
+					</span>
+				{{/ if }}
+			</span> -->
+		</div>
+	</li>
+</template>
+
+<!-- The detail information of post is shown with the help of this template like title, author name, image and post content. We can also comment to the post with the help of this template -->
+
+<template name="post">
+	<div class="container">
+		{{# if Template.subscriptionsReady }}
+			{{# with post }}
+				<header>
+					<h1>Blog - {{title}}</h1>
+				</header>
+				<ul>
+					<li>
+						<div class="post-detail">
+							<h3>
+								{{ title }}
+								<small>by {{ getCreator.profile.name }}</small>
+							</h3>
+							<div class="image" style="background-image: url({{ image.url }})"></div>
+							<br>
+							<div class="content">
+								{{{ body }}}
+							</div>
+						</div><br><hr>
+						<h1>Comments</h1>
+						{{# each CommentList}}
+							<ul class="commentLists">
+								<li>
+									<div class="dropdown pull-right">
+										<button id="actionDropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+											Action
+											<span class="caret"></span>
+										</button>
+										<ul class="dropdown-menu">
+											<li><a href="" class="editComment">Edit</a></li>
+											<li><a href="" class="deleteComment">Delete</a></li>
+										</ul>
+									</div>
+									{{# if getCreator.profile.picture.url}}
+										<img src="{{getCreator.profile.picture.url}}" class="img-circle" alt="Image" id="image">
+									{{else}}
+										<img src="/images/default.png" class="img-circle" alt="Image" id="image">
+									{{/if}}
+									<i>by</i><b> {{ getCreator.profile.name }}</b>
+									<div class="commentText">
+										<br>
+										<div id="edit_{{_id}}" style="display: none">
+											<form>
+												<textarea id="EditCommentBox" rows="3" cols="69" required value='{{comment}}'></textarea>
+												<button type="button" class="btn btn-default" id="saveEdit">Save</button>
+												<small><i>or</i></small>
+												<a href="" id="CancelEdit">Cancel</a>
+											</form>
+										</div>
+										<div id='show_{{_id}}' style="display: block">
+											{{comment}}
+										</div>
+									</div>
+								</li>
+							</ul>
+						{{else}}
+							<p>No comments yet.</p>
+						{{/each}}
+						<br>
+						<button class="btn btn-default" type="button" id="comment">Your Comment</button>
+						<br><br>
+						<div id="CommentArea" style="display: none">
+							<textarea id="CommentBox" placeholder="Enter your comments here..." rows="4" cols="69" required></textarea>
+							<button type="button" class="btn btn-default" id="SubmitComment">Submit</button>
+							<small><i>or</i></small>
+							<a href="" id="CancelComment">Cancel</a>
+						</div>
+					</li>
+				</ul>
+			{{ else }}
+				<p>
+					Not found
+				</p>
+			{{/ with }}
+		{{ else }}
+			<p>
+				Loading...
+			</p>
+		{{/ if }}
+		<footer>
+			<a href="/post">Back</a>
+		</footer>
+	</div>
+</template>

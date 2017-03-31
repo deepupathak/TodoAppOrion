@@ -1,0 +1,11 @@
+{
+  "name": "todoapp",
+  "private": true,
+  "scripts": {
+    "start": "meteor run"
+  },
+  "dependencies": {
+    "meteor-node-stubs": "~0.2.0",
+    "sweetalert": "^1.1.3"
+  }
+}
